@@ -1,0 +1,7 @@
+app:
+  #类型turn、stun
+  server_type: turn
+  server_host: xxx.xxx.xxx.xxx
+  server_port: 3478
+  server_user: xxx
+  server_password: xxxx
