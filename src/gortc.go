@@ -50,12 +50,8 @@ func iceChange() {
 }
 
 func onICECandidate(cdt *webrtc.ICECandidate) {
-	logrus.Debug(cdt.ToJSON())
-	sdp := pc1.LocalDescription()
-	bytes, _ := json.Marshal(sdp)
-	fmt.Println(string(bytes))
-	sdpBase64 := base64.StdEncoding.EncodeToString(bytes)
-	logrus.Info("local sdp:" + sdpBase64)
+	bytes, _ := json.Marshal(cdt.ToJSON())
+	logrus.Debug("on ice candidate:" + string(bytes))
 	iceChange()
 }
 
@@ -94,6 +90,8 @@ func initConnection() {
 		logrus.Error(err)
 		return
 	}
+	pc1.OnICECandidate(onICECandidate)
+
 	offer, err := pc1.CreateOffer(nil)
 	if err != nil {
 		panic(err)
@@ -102,7 +100,13 @@ func initConnection() {
 	if err != nil {
 		panic(err)
 	}
-	pc1.OnICECandidate(onICECandidate)
+	// 获取 Local Description
+	localDesc := pc1.LocalDescription()
+	bytes, _ := json.Marshal(localDesc)
+	logrus.Info("Local Description json :" + string(bytes))
+	sdpBase64 := base64.StdEncoding.EncodeToString(bytes)
+	logrus.Info("local sdp base64:" + sdpBase64)
+
 }
 func main() {
 	util.LogConfig()
