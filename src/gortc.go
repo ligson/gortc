@@ -33,17 +33,20 @@ func iceChange() {
 	if err != nil {
 		panic(err)
 	}
-	logrus.Debug("读取" + strconv.Itoa(n) + "个字节,远程sdp是:" + remoteSdpStr)
+	logrus.Debug("读取" + strconv.Itoa(n) + "个字节,远程sdp-base64是:" + remoteSdpStr)
 	remoteSdpBuffer, err := base64.StdEncoding.DecodeString(remoteSdpStr)
 	if err != nil {
 		panic(err)
 	}
+	logrus.Debug("远程sdp信息是:" + string(remoteSdpBuffer))
 	err = json.Unmarshal(remoteSdpBuffer, &remoteSdp)
 	if err != nil {
+		logrus.Error(err)
 		panic(err)
 	}
 	err = pc1.SetRemoteDescription(remoteSdp)
 	if err != nil {
+		logrus.Error(err)
 		panic(err)
 	}
 	chat()
@@ -100,6 +103,7 @@ func initConnection() {
 	if err != nil {
 		panic(err)
 	}
+
 	// 获取 Local Description
 	localDesc := pc1.LocalDescription()
 	bytes, _ := json.Marshal(localDesc)
