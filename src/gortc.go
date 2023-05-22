@@ -49,6 +49,24 @@ func iceChange() {
 		logrus.Error(err)
 		panic(err)
 	}
+	// Create an answer
+	answer, err := pc1.CreateAnswer(nil)
+	if err != nil {
+		panic(err)
+	}
+	// Create channel that is blocked until ICE Gathering is complete
+	gatherComplete := webrtc.GatheringCompletePromise(pc1)
+	// Block until ICE Gathering is complete, disabling trickle ICE
+	// we do this because we only can exchange one signaling message
+	// in a production application you should exchange ICE Candidates via OnICECandidate
+	<-gatherComplete
+
+	// Sets the LocalDescription, and starts our UDP listeners
+	err = pc1.SetLocalDescription(answer)
+	if err != nil {
+		panic(err)
+	}
+
 	chat()
 }
 
@@ -93,6 +111,9 @@ func initConnection() {
 		logrus.Error(err)
 		return
 	}
+	pc1.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
+		logrus.Debug("ICE Connection State has changed: " + state.String())
+	})
 	pc1.OnICECandidate(onICECandidate)
 
 	offer, err := pc1.CreateOffer(nil)
